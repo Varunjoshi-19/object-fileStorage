@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+
+    <form id="formSubmit">
+
+        <input type="file" id="selectedFile">
+        <button type="submit">Submit</button>
+    </form>
+
+    <button id="fetch">fetch</button>
+    <div id="container">
+    </div>
+
+    <script>
+
+        const url = "https://object-filestorage-production.up.railway.app";
+        let files;
+
+        const fileForm = document.getElementById("formSubmit");
+        const container = document.getElementById("container");
+        const selectedFile = document.getElementById("selectedFile");
+
+        fileForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            if (selectedFile) {
+                const file = selectedFile.files[0];
+                if (!file) {
+                    alert("select file before sumbitting!");
+                    return;
+                }
+
+                uploadFile(file);
+            }
+
+        })
+
+        const fetchData = document.getElementById("fetch").addEventListener("click", async () => {
+            await fetchFiles();
+        })
+
+        async function uploadFile(file) {
+
+            const formdata = new FormData();
+            formdata.set("file", file);
+
+            try {
+                const res = await fetch(`${url}/upload-file`, {
+                    method: "POST",
+                    body: formdata
+                });
+
+                if (res.ok) console.log("file uploaded sucessfully!");
+
+            } catch (error) {
+                console.log(error.message);
+            }
+        }
+
+        async function fetchFiles() {
+            try {
+                const res = await fetch(`${url}/files`);
+                const result = await res.json();
+                if (res.ok) {
+                    files = result.files;
+                    create();
+                }
+
+            } catch (error) {
+                console.log(error.message);
+            }
+        }
+
+
+
+        async function create() {
+
+            files.map((each, index) => {
+                const image = document.createElement("img");
+                image.src = `${url}/render/${each.id}`;
+                image.width = 200;
+                image.height = 200;
+
+                container.append(image);
+            })
+
+        }
+
+
+
+    </script>
+
+</body>
+
+</html>
